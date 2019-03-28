@@ -14,13 +14,13 @@ c= input('Reinforcement yield strength (ksi):');
 x= input('28 days concrete cylinder strength (ksi):');
 y= input('Concrete cover (inch):');
 %}
-X=4;
-areas=[5*1.27 2*1.27 2*1.27 5*1.27];
-c=60;
-x=4;
-y=2.5;
-a=22;
-b=22;
+X=4;   %Number of reinforcement strip
+areas=[5*1.27 2*1.27 2*1.27 5*1.27];  %Total area of rods in each strip
+c=60;  %Reinforcement yield strength(ksi)
+x=4;   %28 days concrete cylinder strength(ksi)
+y=2.5; %Concrete cover (inch)
+h=22;  %Strong axis length(inch)
+b=22;  %Weak axus length(inch)
 
 B1=0.85-0.05*((x*1000-4000)/1000);
 if B1>0.85
@@ -35,20 +35,20 @@ pector=[];
 mector=[];
 
 %Pure Compression Failure Point
-pnc=0.85*(x)*a*b+c*sum(areas);
+pnc=0.85*(x)*h*b+c*sum(areas);
 pector=[pector,pnc];
 mector=[mector,0.0];
 
-dis=((a-2*y)/(X-1));
+dis=((h-2*y)/(X-1));
 areap=fliplr(areas);
 
 %Balanced Failure
-CB=87*(a-y)/(87+c);
+CB=87*(h-y)/(87+c);
 AB=B1*CB;
 CCC=0.85*x*AB*b;
 
-NOCS=round(X*(CB-y)/(a-2*y));
-NOTS=round(X*(a-CB-y)/(a-2*y));
+NOCS=round(X*(CB-y)/(h-2*y));
+NOTS=round(X*(h-CB-y)/(h-2*y));
 
 for I=1:1:NOCS
     FSP(I)=87*(CB-y-dis*(I-1))/CB;
@@ -64,7 +64,7 @@ for I=1:1:NOCS
 end
 
 for IP=1:1:NOTS
-    STRAIN(IP)=(.003/CB)*(a-CB-y-dis*(IP-1));
+    STRAIN(IP)=(.003/CB)*(h-CB-y-dis*(IP-1));
     FS(IP)=STRAIN(IP)*29000;
     
     if FS(IP)>c
@@ -81,13 +81,13 @@ end
 PNB=ceil(CCC+sum(COMP)-sum(TENS));
 
 for MOC=1:1:NOCS
-    TENC(MOC)=COMP(MOC)*(a-y-y-dis*(MOC-1)-.5*a+y);
+    TENC(MOC)=COMP(MOC)*(h-y-y-dis*(MOC-1)-.5*h+y);
 end
 
 for MOT=1:1:NOTS
-    TENT(MOT)=TENS(MOT)*(0.5*a-y-dis*(MOT-1));
+    TENT(MOT)=TENS(MOT)*(0.5*h-y-dis*(MOT-1));
 end
-MNB=ceil(CCC*(a-y-.5*AB-.5*a+y)+sum(TENC)+sum(TENT));
+MNB=ceil(CCC*(h-y-.5*AB-.5*h+y)+sum(TENC)+sum(TENT));
     
 pector=[pector,PNB];
 mector=[mector,MNB];
@@ -99,9 +99,9 @@ C1=CB;
 
 while pn1>=PNB && pn1<=pnc 
     C1=C1+.001;
-    no=(X*(C1-y)/(a-2*y));
+    no=(X*(C1-y)/(h-2*y));
     nosc=round(no);
-    nost=round(X*(a-C1-y)/(a-2*y));
+    nost=round(X*(h-C1-y)/(h-2*y));
     
     if nosc<=0
         nosc=0;
@@ -144,7 +144,7 @@ while pn1>=PNB && pn1<=pnc
     %tension
     if nost>=1
         for stt=1:1:nost
-             strain(stt)=(0.003/C1)*(a-C1-y-dis*(stt-1));
+             strain(stt)=(0.003/C1)*(h-C1-y-dis*(stt-1));
              fs(stt)=strain(stt)*29000;
         
             if fs(stt)>c
@@ -165,19 +165,19 @@ while pn1>=PNB && pn1<=pnc
     
     if nosc>=1
         for moc=1:1:nosc
-            momen(moc)=comp(moc)*(a-y-y-dis*(moc-1)-.5*a+y);
+            momen(moc)=comp(moc)*(h-y-y-dis*(moc-1)-.5*h+y);
         end
     else momen=0;
     end
         
     if nost>=1
         for mot=1:1:nost
-            moment(mot)=tens(mot)*(.5*a-y-dis*(mot-1));
+            moment(mot)=tens(mot)*(.5*h-y-dis*(mot-1));
         end
     else moment=0;
     end
         
-    mn1=ceil(sum(momen)+sum(moment)+ccc*(a-y-.5*aaa-.5*a+y));
+    mn1=ceil(sum(momen)+sum(moment)+ccc*(h-y-.5*aaa-.5*h+y));
     
     pector=[pector,pn1];
     mector=[mector,mn1];
@@ -191,9 +191,9 @@ C2=CB;
 
 while pn2>=0 && pn2<=PNB
     C2=C2-.001;
-    no2=(X*(C2-y)/(a-2*y));
+    no2=(X*(C2-y)/(h-2*y));
     nosc2=round(no2);
-    nost2=round(X*(a-C2-y)/(a-2*y));
+    nost2=round(X*(h-C2-y)/(h-2*y));
     
     if nosc2<=0
         nosc2=0;
@@ -234,7 +234,7 @@ while pn2>=0 && pn2<=PNB
     %tension
     if nost2>=1
         for stt2=1:1:nost2
-            strain2(stt2)=(0.003/C2)*(a-C2-y-dis*(stt2-1));
+            strain2(stt2)=(0.003/C2)*(h-C2-y-dis*(stt2-1));
         
             fs2(stt2)=strain2(stt2)*29000;
         
@@ -256,19 +256,19 @@ while pn2>=0 && pn2<=PNB
     
     if nosc2>=1
         for moc2=1:1:nosc2
-        momen2(moc2)=comp2(moc2)*(a-y-y-dis*(moc2-1)-.5*a+y);
+        momen2(moc2)=comp2(moc2)*(h-y-y-dis*(moc2-1)-.5*h+y);
         end
     else momen2=0;
     end
     
     if nost2>=1
         for mot2=1:1:nost2
-            moment2(mot2)=tens2(mot2)*(.5*a-y-dis*(mot2-1));
+            moment2(mot2)=tens2(mot2)*(.5*h-y-dis*(mot2-1));
         end
     else moment2=0;
     end
         
-    mn2=ceil(sum(momen2)+sum(moment2)+ccc2*(a-y-.5*aaa2-.5*a+y));
+    mn2=ceil(sum(momen2)+sum(moment2)+ccc2*(h-y-.5*aaa2-.5*h+y));
     
     pector=[pector,pn2];
     mector=[mector,mn2];
